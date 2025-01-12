@@ -1,19 +1,8 @@
 #!/bin/bash
-# Author: Naccl
-#
-# This script is used to deploy NBlog to my server, apply my changes
-# on the "prod" branch for myself.
-# I didn't upload "prod" branch because it has my own configuration,
-# so you may not be able to use it.
+# 简化版部署脚本 - 适用于 macOS (Intel) 环境
 
-project_local_path=~/work/idea-project/NBlog
-dev_branch=master
-prod_branch=prod
-server=aliyun
-api_path=/home/nblog/api
-cms_path=/home/nblog/cms
-view_path=/home/nblog/view
-
+# 获取脚本所在目录的绝对路径
+project_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function echo_msg()
 {
@@ -30,86 +19,50 @@ function echo_msg()
   esac
 }
 
-module_name=''
-server_path=''
-
 function menu()
 {
   echo -e "\033[35m(1)blog-api\033[0m"
   echo -e "\033[35m(2)blog-cms\033[0m"
   echo -e "\033[35m(3)blog-view\033[0m"
   
-  read -p "choice a module to deploy: " module
+  read -p "选择要部署的模块: " module
   case $module in
     1)
-      echo_msg 0 "deploy blog-api"
-      module_name=blog-api
-      server_path=$api_path
+      echo_msg 0 "部署 blog-api"
       deploy_springboot
       ;;
     2)
-      echo_msg 0 "deploy blog-cms"
-      module_name=blog-cms
-      server_path=$cms_path
-      deploy_vue
+      echo_msg 0 "部署 blog-cms" 
+      deploy_vue "blog-cms"
       ;;
     3)
-      echo_msg 0 "deploy blog-view"
-      module_name=blog-view
-      server_path=$view_path
-      deploy_vue
+      echo_msg 0 "部署 blog-view"
+      deploy_vue "blog-view"
       ;;
     *)
-      echo_msg 1 "ERROR INPUT"
+      echo_msg 1 "输入错误"
       exit 1
   esac
-  echo_msg 0 "DONE"
+  echo_msg 0 "部署完成"
 }
 
 function deploy_springboot()
 {
-  git_merge
-  echo_msg 0 "build $module_name"
+  cd "${project_path}/blog-api"
+  echo_msg 0 "构建 blog-api"
   mvn clean package -Dmaven.test.skip=true
-  echo_msg 0 "scp target jar to server"
-  scp target/blog-api-0.0.1.jar ${server}:${server_path}
-  read -p "restart $module_name right now? [y/n]: " restart
-  case $restart in
-    y)
-      ssh $server "cd ${server_path} && sh run.sh"
-      ;;
-    *)
-      ;;
-  esac
+  echo_msg 0 "启动 Spring Boot 应用"
+  java -jar target/blog-api-0.0.1.jar
 }
 
 function deploy_vue()
 {
-  git_merge
-  echo_msg 0 "build $module_name"
-  npm run build
-  echo_msg 0 "create dir to server if not exist, clean server dist dir if exist"
-  ssh $server "rm -rf $server_path/dist && mkdir -p $server_path/dist"
-  echo_msg 0 "scp dist to server"
-  scp -r dist ${server}:${server_path}
-}
-
-function git_merge()
-{
-  cd ${project_local_path}/${module_name}
-  branch=$(git rev-parse --abbrev-ref HEAD)
-  if [[ $branch = $dev_branch ]]; then
-    echo_msg 0 "branch in $branch, checkout to $prod_branch"
-    git checkout $prod_branch
-    echo_msg 0 "merge $branch into $prod_branch"
-    git merge -m "Merge branch '$branch' into $prod_branch" "$branch"
-  elif [[ $branch = $prod_branch ]]; then
-    echo_msg 0 "branch already in $prod_branch"
-  else
-    echo_msg 1 "ERROR branch in '$branch'"
-    exit 1
-  fi
+  local module_name=$1
+  cd "${project_path}/${module_name}"
+  echo_msg 0 "安装依赖"
+  npm install
+  echo_msg 0 "构建 ${module_name}"
+  npm run serve
 }
 
 menu
-read -n 1 -p "Press any key to exit..."
