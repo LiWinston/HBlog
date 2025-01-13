@@ -4,7 +4,7 @@ import 'nprogress/nprogress.css'
 import {Message} from 'element-ui'
 
 const request = axios.create({
-	baseURL: 'https://blog..api.bitsleep.cn',
+	baseURL: 'https://blog.api.bitsleep.cn',
 	timeout: 5000
 })
 
