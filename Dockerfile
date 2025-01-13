@@ -41,5 +41,5 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY start-services.sh /start-services.sh
 RUN chmod +x /start-services.sh
 
-EXPOSE 12090 12091 12092
+EXPOSE 80 12090
 CMD ["/start-services.sh"] 
