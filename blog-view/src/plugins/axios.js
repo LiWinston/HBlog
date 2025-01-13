@@ -3,7 +3,7 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
 const request = axios.create({
-	baseURL: 'http://localhost:12090/',
+	baseURL: 'https://blog.api.bitsleep.cn',
 	timeout: 10000,
 })
 
