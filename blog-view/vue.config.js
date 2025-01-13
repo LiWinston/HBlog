@@ -5,7 +5,9 @@ module.exports = {
 		overlay: {
 			warnings: false,
 			errors: true
-		}
+		},
+		disableHostCheck: true,
+		allowedHosts: "all"
 	},
 	configureWebpack: {
 		resolve: {
