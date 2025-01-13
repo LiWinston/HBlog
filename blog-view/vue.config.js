@@ -7,7 +7,6 @@ module.exports = {
 			errors: true
 		},
 		disableHostCheck: true,
-		allowedHosts: "all"
 	},
 	configureWebpack: {
 		resolve: {
