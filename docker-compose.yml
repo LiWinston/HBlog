@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  nblog:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nblog
+    ports:
+      - "80:80"      # 前端访问端口
+      - "12090:12090"  # API端口
+    volumes:
+      - ./blog-api/src/main/resources/.env:/app/.env  # 环境变量文件
+      - ./blog-api/upload:/app/upload  # 上传文件目录
+    restart: unless-stopped 
